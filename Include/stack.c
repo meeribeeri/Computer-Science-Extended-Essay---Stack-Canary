@@ -4,8 +4,8 @@ void canary_tripped(void) {
 }
 
 
-unsigned long __stack_chk_guard;
+unsigned long canary_value;
 void canary_setup(void)
 {
-     __stack_chk_guard = 0xBAAAAAAD;//provide some magic numbers
+     canary_value = 0xBAAAAAAD;//provide some magic numbers
 }
