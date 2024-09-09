@@ -14,9 +14,12 @@
 #define PRIMES 1000
 #define CANARY_MAX 0xFF
 #define CANARY_MIN 0
+#define DATA_FILE "1ByteCanaryData.txt"
+#define CANARY_BYTES 1
 
 int selection;
 uint8_t canary_value;
+clock_t test_start;
 
 //Canary Functions
 void canary_tripped(void) {
@@ -41,6 +44,7 @@ void bypassed() {
 //Functions for the actual tests
 
 void prime_test() {
+    test_start = clock();
     //This is a prime cruncher to test cpu
     uint8_t canary;
     memcpy(&canary, &canary_value, sizeof(canary_value));
@@ -84,6 +88,7 @@ void prime_test() {
 }
 
 void canary_test() {
+    test_start = clock();
     //This is roppable
     uint8_t canary;
     memcpy(&canary, &canary_value, sizeof(canary_value));
@@ -137,7 +142,7 @@ int main() {
 
     memcpy(&canary, &canary_value, sizeof(canary_value));
     
-
+    
     //gets(buf);
 
     if (canary_value == 0) {
@@ -148,5 +153,12 @@ int main() {
         canary_tripped();
     }
     clock_t program_end = clock();
-    printf("\nFinal Time: %f", (double)(program_end-program_start)/CLOCKS_PER_SEC);
+    printf("\nTest Time: %f\nFinal Time: %f", (double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+
+    //write data to file
+    FILE *file_pointer;
+
+    file_pointer = fopen(DATA_FILE,"a");
+    fprintf(file_pointer, "%d\t%d\t%x\t%f\t%fs",selection,CANARY_BYTES,canary_value,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+    fclose(file_pointer);
 }
