@@ -22,8 +22,11 @@ uint8_t canary_value;
 clock_t test_start;
 
 //Canary Functions
+void canary_test();
 void canary_tripped(void) {
-    printf("Canary Has Been Detected To Be Changed. Restarting Function");
+    printf("Canary Has Been Detected To Be Changed. Restarting Function\n");
+    //This here SHOULD be fine since its not like the increased me use from the added canary will change much... hopefully... and Im not measuring mem use during this anyway
+    canary_test();
 }
 
 void canary_setup(void) {
