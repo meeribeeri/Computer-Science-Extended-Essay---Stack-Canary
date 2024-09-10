@@ -20,18 +20,26 @@
 int selection;
 uint8_t canary_value;
 clock_t test_start;
+clock_t program_start;
 
 //Canary Functions
 void canary_test();
+void recursive_function_to_have_many_locals_on_the_stack(int recursive_num);
 void canary_tripped(void) {
-    printf("Canary Has Been Detected To Be Changed. Restarting Function\n");
-    //This here SHOULD be fine since its not like the increased me use from the added canary will change much... hopefully... and Im not measuring mem use during this anyway
-    canary_test();
+    //fflush(stdin);
+    printf("\nCanary Has Been Detected To Be Changed. Restarting Function\n");
+    exit(0);
 }
 
 void canary_setup(void) {
-     canary_value = rand() % (CANARY_MAX - CANARY_MIN + 1) + CANARY_MIN;
-     printf("%x\n", canary_value);
+    FILE *file_ptr;
+    file_ptr = fopen("Canary.txt","r");
+    int temp_canary;
+    fscanf(file_ptr,"%d",&canary_value);
+    printf("\nC: %d\n",canary_value);
+
+    //canary_value = rand() % (CANARY_MAX - CANARY_MIN + 1) + CANARY_MIN;
+    printf("%x\n", canary_value);
 }
 
 void print_memory_status(uint8_t local_canary, char* buffer) {
@@ -42,6 +50,15 @@ void print_memory_status(uint8_t local_canary, char* buffer) {
 //function to know that canary has been bypassed fully
 void bypassed() {
     printf("Canary Bypassed");
+
+    clock_t program_end = clock();
+    printf("\nTest Time: %f\nFinal Time: %f", (double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+    FILE *file_pointer;
+
+    file_pointer = fopen(DATA_FILE,"a");
+    fprintf(file_pointer, "%d\t%d\t%x\t%f\t%fs",selection,CANARY_BYTES,canary_value,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+    fclose(file_pointer);
+    exit(0);
 }
 
 //Functions for the actual tests
@@ -111,7 +128,22 @@ void canary_test() {
 
     if (memcmp(&canary,&canary_value,sizeof(canary_value))) {
         canary_tripped();
+    } else {
+        printf("\nCanary did not trip.\n");
     }
+    exit(0);
+}
+
+void canary_reset() {
+    canary_value = rand() % (CANARY_MAX - CANARY_MIN + 1) + CANARY_MIN;
+    printf("%x\n", canary_value);
+
+    FILE *file_pointer;
+    file_pointer = fopen("Canary.txt","w");
+
+    fprintf(file_pointer, "%d", canary_value);
+    fclose(file_pointer);
+    exit(0);
 }
 
 void recursive_function_to_have_many_locals_on_the_stack(int recursion_num) {
@@ -122,7 +154,11 @@ void recursive_function_to_have_many_locals_on_the_stack(int recursion_num) {
     } else if (selection == 1) {
         prime_test();
     } else if (selection == 2) {
-        canary_test();
+        while (true) {
+            canary_test();
+        }
+    } else if (selection == 3) {
+        canary_reset();
     }
 
     if (memcmp(&canary,&canary_value,sizeof(canary_value))) {
@@ -131,14 +167,14 @@ void recursive_function_to_have_many_locals_on_the_stack(int recursion_num) {
 }
 
 int main() {
-    clock_t program_start = clock();
+    program_start = clock();
 
     srand(time(0));
     canary_setup();
 
     uint8_t canary;
 
-    printf("Enter '1' to perform a prime cruncher test.\nEnter '2' to perform a canary test\nInput: ");
+    printf("Enter '1' to perform a prime cruncher test.\nEnter '2' to perform a canary test\nEnter '3' to change the canary\nInput: ");
     scanf("%d", &selection);
 
     recursive_function_to_have_many_locals_on_the_stack(RECURSION_MAX);
@@ -161,7 +197,15 @@ int main() {
     //write data to file
     FILE *file_pointer;
 
-    file_pointer = fopen(DATA_FILE,"a");
-    fprintf(file_pointer, "%d\t%d\t%x\t%f\t%fs",selection,CANARY_BYTES,canary_value,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+    if (fopen(DATA_FILE,"a") == 0) {
+        printf("\nWriting\n");
+        file_pointer = fopen(DATA_FILE,"w");
+        fprintf(file_pointer, "Test Type    Canary Size   Canary Value   Test Time    Program Time\n%d\t%d\t%x\t%f\t%fs",selection,CANARY_BYTES,canary_value,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+    } else {
+        file_pointer = fopen(DATA_FILE,"a");
+        fprintf(file_pointer, "\n%d\t%d\t%x\t%f\t%fs",selection,CANARY_BYTES,canary_value,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+        printf("\nAppending\n");
+    }
+    
     fclose(file_pointer);
 }

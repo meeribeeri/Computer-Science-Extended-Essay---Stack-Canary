@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "f:/Code/Extended Essay",
-      "program": "f:/Code/Extended Essay/build/Debug/outDebug",
+      "program": "${workspaceFolder}/main",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
