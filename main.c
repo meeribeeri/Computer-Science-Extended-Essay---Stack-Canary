@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-
+//to compile: gcc -o main main.c -fno-stack-protector -no-pie
 
 #define BUFFER_SIZE 8
 #define RECURSION_MAX 98
@@ -118,20 +118,19 @@ void canary_test() {
 
     print_memory_status(canary, buf);
 
-    printf("Enter the number of maximum bytes to be read: ");
+    printf("Enter the number of maximum bytes to be read:\n");
     scanf("%d", &read_bytes);
-    printf("Enter what to write to the buffer: ");
+    printf("Enter what to write to the buffer:\n");
     read(0,buf,read_bytes);
 
-    print_memory_status(canary, buf);
-    printf("%s",buf);
+    //print_memory_status(canary, buf);
+    //printf("%s",buf);
 
     if (memcmp(&canary,&canary_value,sizeof(canary_value))) {
         canary_tripped();
     } else {
         printf("\nCanary did not trip.\n");
     }
-    exit(0);
 }
 
 void canary_reset() {
