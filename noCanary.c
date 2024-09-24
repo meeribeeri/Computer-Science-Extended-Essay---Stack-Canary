@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-//to compile: gcc -o 0bytecanary main.c -fno-stack-protector -no-pie
+//to compile: gcc -o 0bytecanary noCanary.c -fno-stack-protector -no-pie
 
 #define BUFFER_SIZE 8
 #define RECURSION_MAX 98
@@ -108,6 +108,7 @@ void canary_test() {
 }
 
 void canary_reset() {
+    printf("This is just here to not cause an error\n");
     exit(0);
 }
 
@@ -156,10 +157,10 @@ int main() {
     if (fopen(DATA_FILE,"a") == 0) {
         printf("\nWriting\n");
         file_pointer = fopen(DATA_FILE,"w");
-        fprintf(file_pointer, "Test Type    Canary Size   Canary Value   Test Time    Program Time\n%d\t%d\t%x\t%f\t%fs",selection,CANARY_BYTES,canary_value,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+        fprintf(file_pointer, "Test Type    Canary Size   Canary Value   Test Time    Program Time\n%d\t%d\t%f\t%fs",selection,CANARY_BYTES,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
     } else {
         file_pointer = fopen(DATA_FILE,"a");
-        fprintf(file_pointer, "\n%d\t%d\t%x\t%f\t%fs",selection,CANARY_BYTES,canary_value,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
+        fprintf(file_pointer, "\n%d\t%d\t%f\t%fs",selection,CANARY_BYTES,(double)(program_end-test_start)/CLOCKS_PER_SEC,(double)(program_end-program_start)/CLOCKS_PER_SEC);
         printf("\nAppending\n");
     }
     

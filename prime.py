@@ -6,13 +6,15 @@ executable = input("Input the name of the file to be run. This is 5 tests: ")
 times = []
 
 for i in range(5):
-    start_time = time.time()
+    
     p = process(f"./{executable}")
     p.recv()
     p.sendline(b"3")
     p.recv()
+    time.sleep(2)
     p.close()
 
+    start_time = time.time()
     p = process(f"./{executable}")
     p.recv()
     p.sendline(b"1")
@@ -23,7 +25,7 @@ for i in range(5):
 
 print(times)
 try:
-    file = open(f"{executable}-prime-data.txt","a")
+    file = open(f"{executable}-prime-data.txt","w")
     file.write("Start Time\t\t\tEnd Time\t\t\tDelta Time\n")
     ave = 0
     for data in times:
