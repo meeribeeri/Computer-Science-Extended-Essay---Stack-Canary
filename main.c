@@ -7,18 +7,18 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-//to compile: gcc -o 1bytecanary main.c -fno-stack-protector -no-pie
+//to compile: gcc -o 8bytecanary main.c -fno-stack-protector -no-pie
 //a
 #define BUFFER_SIZE 8
 #define RECURSION_MAX 98
 #define PRIMES 1000
 #define CANARY_MAX 0xFFFFFFFFFFFFFFFF
 #define CANARY_MIN 0
-#define DATA_FILE "1ByteCanaryData.txt"
-#define CANARY_BYTES 1
+#define DATA_FILE "8ByteCanaryData.txt"
+#define CANARY_BYTES 8
 
 int selection;
-uint8_t canary_value;
+uint64_t canary_value;
 clock_t test_start;
 clock_t program_start;
 
@@ -42,7 +42,7 @@ void canary_setup(void) {
     printf("%x\n", canary_value);
 }
 
-void print_memory_status(uint8_t local_canary, char* buffer) {
+void print_memory_status(uint64_t local_canary, char* buffer) {
     printf("canary value: %p\tglobal canary value: %p\tbuffer memory: %p\n",local_canary,canary_value,buffer);
     printf("canary address: %p\tglobal canary address %p\tbuffer address: %p\nbuffer value: ", (void*)&local_canary,(void*)&canary_value,(void*)&buffer);
 }
@@ -66,7 +66,7 @@ void bypassed() {
 void prime_test() {
     test_start = clock();
     //This is a prime cruncher to test cpu
-    uint8_t canary;
+    uint64_t canary;
     memcpy(&canary, &canary_value, sizeof(canary_value));
 
     int current_num = 2;
@@ -110,7 +110,7 @@ void prime_test() {
 void canary_test() {
     test_start = clock();
     //This is roppable
-    uint8_t canary;
+    uint64_t canary;
     memcpy(&canary, &canary_value, sizeof(canary_value));
 
     char buf[BUFFER_SIZE];
@@ -142,7 +142,7 @@ void canary_reset() {
         //printf("%x\t%x\n",random,canary_value);
     }
     //canary_value = rand() % (CANARY_MAX - CANARY_MIN + 1) + CANARY_MIN;
-    printf("%x\n", canary_value);
+    printf("%x\n%i\n", canary_value, canary_value);
 
     FILE *file_pointer;
     file_pointer = fopen("Canary.txt","w");
@@ -153,7 +153,7 @@ void canary_reset() {
 }
 
 void recursive_function_to_have_many_locals_on_the_stack(int recursion_num) {
-    uint8_t canary;
+    uint64_t canary;
     memcpy(&canary, &canary_value, sizeof(canary_value));
     if (recursion_num > 0) {
         recursive_function_to_have_many_locals_on_the_stack(recursion_num-1);
@@ -178,7 +178,7 @@ int main() {
     srand(time(0));
     canary_setup();
 
-    uint8_t canary;
+    uint64_t canary;
 
     printf("Enter '1' to perform a prime cruncher test.\nEnter '2' to perform a canary test\nEnter '3' to change the canary\nInput: ");
     scanf("%d", &selection);
