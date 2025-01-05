@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-//to compile: gcc -o 0bytecanary noCanary.c -fno-stack-protector -no-pie
+//to compile: gcc -o 0bytecanary noCanary.c -fno-stack-protector -O0 -no-pie
 
 #define BUFFER_SIZE 8
 #define RECURSION_MAX 98
@@ -28,7 +28,7 @@ void canary_setup(void) {
     printf("%s\n", "There is no canary");
 }
 
-void print_memory_status(uint16_t local_canary, char* buffer) {
+void print_memory_status(uint32_t local_canary, char* buffer) {
     printf("%s\n", "There is no canary");
 }
 
